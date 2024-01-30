@@ -9,16 +9,13 @@ app.use(express.json());
 
 app.use(express.static(path.join(__dirname, "client")));
 
-const vapidKeys = webPush.generateVAPIDKeys();
+const publicKey = process.env.VAPID_PUBLIC_KEY;
+const privateKey = process.env.VAPID_PRIVATE_KEY;
 const vapidSubject = process.env.VAPID_SUBJECT;
 
-console.log(vapidKeys);
+console.log(publicKey);
 
-webPush.setVapidDetails(
-  vapidSubject,
-  vapidKeys.publicKey,
-  vapidKeys.privateKey
-);
+webPush.setVapidDetails(vapidSubject, publicKey, privateKey);
 
 app.post("/subscribe", (req, res) => {
   const subscription = req.body;
