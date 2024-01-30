@@ -12,7 +12,7 @@ app.use(express.static(path.join(__dirname, "client")));
 const vapidKeys = webPush.generateVAPIDKeys();
 const vapidSubject = process.env.VAPID_SUBJECT;
 
-console.log(publicKey);
+console.log(vapidKeys);
 
 webPush.setVapidDetails(
   vapidSubject,
