@@ -47,3 +47,21 @@ form.addEventListener("submit", async (e) => {
   };
   socket.emit("message", socketArg);
 });
+
+const isPageVisible = () => {
+  return !document.hidden;
+};
+
+const clearNotifications = () => {
+  if ("clearNotifications" in window.Notification) {
+    console.log("clearing");
+    window.Notification.clear();
+  }
+};
+
+document.addEventListener("visibilitychange", function () {
+  if (isPageVisible()) {
+    // Page is now visible, clear notifications
+    clearNotifications();
+  }
+});

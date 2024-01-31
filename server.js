@@ -30,8 +30,6 @@ io.on("connect", (socket) => {
     const message = arg.message;
     const subscription = arg.subscription;
 
-    console.log(subscription);
-
     socket.broadcast.emit("message", message);
 
     const payload = JSON.stringify({
@@ -40,6 +38,7 @@ io.on("connect", (socket) => {
     });
     subscriptions.forEach(async (sub) => {
       if (sub.endpoint !== subscription.endpoint) {
+        console.log("pushing");
         await webPush.sendNotification(sub, payload).catch(console.error);
       }
     });
@@ -48,7 +47,9 @@ io.on("connect", (socket) => {
 
 app.post("/subscribe", (req, res) => {
   const subscription = req.body;
-  subscriptions.push(subscription);
+  if (subscription) {
+    subscriptions.push(subscription);
+  }
   res.status(201);
   const payload = JSON.stringify({
     title: "Hello world",
