@@ -22,6 +22,8 @@ console.log(publicKey);
 
 webPush.setVapidDetails(vapidSubject, publicKey, privateKey);
 
+const subscriptions = [];
+
 io.on("connect", (socket) => {
   console.log("connected");
   socket.on("message", (arg) => {
@@ -36,13 +38,17 @@ io.on("connect", (socket) => {
       title: "New Message",
       body: message,
     });
-
-    webPush.sendNotification(subscription, payload).catch(console.error);
+    subscriptions.forEach(async (sub) => {
+      if (sub.endpoint !== subscription.endpoint) {
+        await webPush.sendNotification(sub, payload).catch(console.error);
+      }
+    });
   });
 });
 
 app.post("/subscribe", (req, res) => {
   const subscription = req.body;
+  subscriptions.push(subscription);
   res.status(201);
   const payload = JSON.stringify({
     title: "Hello world",
