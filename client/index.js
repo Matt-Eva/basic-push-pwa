@@ -23,3 +23,27 @@ const registerServiceWorker = async () => {
 if ("serviceWorker" in navigator) {
   registerServiceWorker();
 }
+
+const socket = io();
+const form = document.getElementById("form");
+const messageContainer = document.getElementById("message-container");
+console.log(form);
+
+socket.on("message", (arg) => {
+  console.log(arg);
+  const p = document.createElement("p");
+  p.textContent = arg;
+  messageContainer.append(p);
+});
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const message = e.target.textInput.value;
+  const registration = await navigator.serviceWorker.getRegistration();
+  const subscription = await registration.pushManager.getSubscription();
+  const socketArg = {
+    subscription,
+    message,
+  };
+  socket.emit("message", socketArg);
+});

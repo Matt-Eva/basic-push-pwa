@@ -1,8 +1,13 @@
 require("dotenv").config();
 const express = require("express");
-const app = express();
 const webPush = require("web-push");
 const path = require("path");
+const { createServer } = require("http");
+const { Server } = require("socket.io");
+
+const app = express();
+const server = createServer(app);
+const io = new Server(server);
 const port = 4000;
 
 app.use(express.json());
@@ -17,6 +22,25 @@ console.log(publicKey);
 
 webPush.setVapidDetails(vapidSubject, publicKey, privateKey);
 
+io.on("connect", (socket) => {
+  console.log("connected");
+  socket.on("message", (arg) => {
+    const message = arg.message;
+    const subscription = arg.subscription;
+
+    console.log(subscription);
+
+    socket.broadcast.emit("message", message);
+
+    const payload = JSON.stringify({
+      title: "New Message",
+      body: message,
+    });
+
+    webPush.sendNotification(subscription, payload).catch(console.error);
+  });
+});
+
 app.post("/subscribe", (req, res) => {
   const subscription = req.body;
   res.status(201);
@@ -28,6 +52,6 @@ app.post("/subscribe", (req, res) => {
   webPush.sendNotification(subscription, payload).catch(console.error);
 });
 
-app.listen(port, () => {
+server.listen(port, () => {
   console.log("Server started on " + port);
 });

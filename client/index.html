@@ -3,10 +3,24 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Document</title>
+    <title>Basic Push PWA</title>
     <script defer src="index.js"></script>
+    <script src="/socket.io/socket.io.js"></script>
+    <link rel="stylesheet" href="styles.css" />
+    <meta
+      name="description"
+      content="A social media and real time chat application."
+    />
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon-180x180.png" />
+    <link rel="manifest" href="/manifest.json" />
   </head>
   <body>
     <h1>Push Notifications with Web-Push</h1>
+    <section id="message-container"></section>
+    <form id="form">
+      <input type="text" name="textInput" />
+      <input type="submit" />
+    </form>
   </body>
 </html>
