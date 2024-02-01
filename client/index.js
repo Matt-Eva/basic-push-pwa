@@ -60,14 +60,10 @@ const clearNotifications = () => {
 let count = 0;
 
 navigator.serviceWorker.addEventListener("message", (event) => {
-  console.log("message event");
-  console.log(document.hidden);
   if (!document.hidden) {
     if (event.data && event.data.type === "pushNotification") {
-      console.log(event.data);
       count += 1;
       // Handle the push notification event as needed
-      console.log("Received push notification from service worker" + count);
       navigator.serviceWorker.ready.then((reg) => {
         reg.getNotifications().then((notifications) => {
           for (let i = 0; i < notifications.length; i += 1) {
@@ -81,18 +77,27 @@ navigator.serviceWorker.addEventListener("message", (event) => {
   }
 });
 
-document.addEventListener("visibilitychange", function () {
+document.addEventListener("visibilitychange", async () => {
   console.log("visibility changed");
-  if (isPageVisible()) {
-    // Page is now visible, clear notifications
-    // clearNotifications();
-    console.log("visible page");
-    navigator.serviceWorker.ready.then((reg) => {
-      reg.getNotifications().then((notifications) => {
-        for (let i = 0; i < notifications.length; i += 1) {
-          notifications[i].close();
-        }
-      });
+  console.log(document.hidden);
+  await navigator.serviceWorker.ready;
+  if (!document.hidden) {
+    navigator.serviceWorker.controller.postMessage({
+      type: "focusState",
+      isFocused: true,
+    });
+  } else {
+    navigator.serviceWorker.controller.postMessage({
+      type: "focusState",
+      isFocused: false,
     });
   }
 });
+
+// window.addEventListener("blur", () => {
+//   console.log("blurred");
+// });
+
+// window.addEventListener("focus", () => {
+//   console.log("focused");
+// });
