@@ -46,17 +46,23 @@ form.addEventListener("submit", async (e) => {
   socket.emit("message", socketArg);
 });
 
-const clearNotifications = () => {
-  if ("clearNotifications" in window.Notification) {
-    console.log("clearing");
-    window.Notification.clear();
-  }
-};
+document.addEventListener("visibilitychange", async () => {
+  console.log("changing visibility");
+  if (!document.hidden) {
+    navigator.serviceWorker.ready.then((reg) => {
+      reg.getNotifications().then((notifications) => {
+        for (let i = 0; i < notifications.length; i += 1) {
+          notifications[i].close();
+        }
+      });
+    });
 
-window.addEventListener("blur", async () => {
-  console.log("blurred");
-  await navigator.serviceWorker.ready;
-  if (document.hidden) {
+    navigator.serviceWorker.controller.postMessage({
+      type: "focusState",
+      isFocused: true,
+    });
+  } else {
+    await navigator.serviceWorker.ready;
     navigator.serviceWorker.controller.postMessage({
       type: "focusState",
       isFocused: false,
@@ -64,19 +70,29 @@ window.addEventListener("blur", async () => {
   }
 });
 
-window.addEventListener("focus", async () => {
-  console.log("focused");
+// window.addEventListener("blur", async () => {
+//   console.log("blurred");
+//   await navigator.serviceWorker.ready;
+//   if (document.hidden) {
+//     navigator.serviceWorker.controller.postMessage({
+//       type: "focusState",
+//       isFocused: false,
+//     });
+//   }
+// });
 
-  navigator.serviceWorker.ready.then((reg) => {
-    reg.getNotifications().then((notifications) => {
-      for (let i = 0; i < notifications.length; i += 1) {
-        notifications[i].close();
-      }
-    });
-  });
+// window.addEventListener("focus", async () => {
+//   console.log("focused");
+//   navigator.serviceWorker.ready.then((reg) => {
+//     reg.getNotifications().then((notifications) => {
+//       for (let i = 0; i < notifications.length; i += 1) {
+//         notifications[i].close();
+//       }
+//     });
+//   });
 
-  navigator.serviceWorker.controller.postMessage({
-    type: "focusState",
-    isFocused: true,
-  });
-});
+//   navigator.serviceWorker.controller.postMessage({
+//     type: "focusState",
+//     isFocused: true,
+//   });
+// });
