@@ -42,80 +42,94 @@ const openDatabase = () => {
 
 self.addEventListener("push", async (e) => {
   const data = e.data.json();
+  e.waitUntil(
+    self.registration.showNotification(data.title, {
+      body: data.body,
+    })
+  );
 
-  if (!db) {
-    await openDatabase();
-  }
-
-  const transaction = db.transaction(["focusState"]);
-  const objectStore = transaction.objectStore("focusState");
-  const request = objectStore.get(1);
-
-  request.onerror = (event) => {
-    console.log(event.target.error);
-  };
-
-  request.onsuccess = (event) => {
-    const result = event.target.result;
-    console.log(result);
-    if (result && !result.isFocused) {
-      self.registration.showNotification(data.title, {
-        body: data.body,
-      });
-    }
-  };
+  self.clients.matchAll().then((clients) => {
+    clients.forEach((client) => {
+      client.postMessage({ type: "pushNotification" });
+    });
+  });
 });
+// self.addEventListener("push", async (e) => {
+//   const data = e.data.json();
 
-self.addEventListener("message", async (event) => {
-  console.log("message received");
-  console.log(event.data);
-  console.log(event.data.type);
+//   if (!db) {
+//     await openDatabase();
+//   }
 
-  if (!db) {
-    await openDatabase();
-  }
+//   const transaction = db.transaction(["focusState"]);
+//   const objectStore = transaction.objectStore("focusState");
+//   const request = objectStore.get(1);
 
-  console.log(db);
+//   request.onerror = (event) => {
+//     console.log(event.target.error);
+//   };
 
-  if (event.data && event.data.type === "focusState" && db) {
-    console.log("changing focus from sw");
-    const isFocused = event.data.isFocused;
+//   request.onsuccess = (event) => {
+//     const result = event.target.result;
+//     console.log(result);
+//     if (result && !result.isFocused) {
+//       self.registration.showNotification(data.title, {
+//         body: data.body,
+//       });
+//     }
+//   };
+// });
 
-    const objectStore = db
-      .transaction(["focusState"], "readwrite")
-      .objectStore("focusState");
+// self.addEventListener("message", async (event) => {
+//   console.log("message received");
+//   console.log(event.data);
+//   console.log(event.data.type);
 
-    const request = objectStore.get(1);
+//   if (!db) {
+//     await openDatabase();
+//   }
 
-    request.onerror = (event) => {
-      console.error(event.target.error);
-    };
+//   console.log(db);
 
-    request.onsuccess = (event) => {
-      const data = event.target.result;
-      if (!data) {
-        const request = objectStore.add({ id: 1, isFocused: isFocused });
+//   if (event.data && event.data.type === "focusState" && db) {
+//     console.log("changing focus from sw");
+//     const isFocused = event.data.isFocused;
 
-        request.onsuccess = (event) => {
-          console.log("successfully added new data");
-        };
+//     const objectStore = db
+//       .transaction(["focusState"], "readwrite")
+//       .objectStore("focusState");
 
-        request.onerror = (event) => {
-          console.error(event.target.error);
-        };
-      } else {
-        data.isFocused = isFocused;
+//     const request = objectStore.get(1);
 
-        const requestUpdate = objectStore.put(data);
+//     request.onerror = (event) => {
+//       console.error(event.target.error);
+//     };
 
-        requestUpdate.onsuccess = (event) => {
-          console.log("successfully updated existing data");
-        };
+//     request.onsuccess = (event) => {
+//       const data = event.target.result;
+//       if (!data) {
+//         const request = objectStore.add({ id: 1, isFocused: isFocused });
 
-        requestUpdate.onerror = (event) => {
-          console.error(event.target.error);
-        };
-      }
-    };
-  }
-});
+//         request.onsuccess = (event) => {
+//           console.log("successfully added new data");
+//         };
+
+//         request.onerror = (event) => {
+//           console.error(event.target.error);
+//         };
+//       } else {
+//         data.isFocused = isFocused;
+
+//         const requestUpdate = objectStore.put(data);
+
+//         requestUpdate.onsuccess = (event) => {
+//           console.log("successfully updated existing data");
+//         };
+
+//         requestUpdate.onerror = (event) => {
+//           console.error(event.target.error);
+//         };
+//       }
+//     };
+//   }
+// });
