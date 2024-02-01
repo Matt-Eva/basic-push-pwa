@@ -71,6 +71,7 @@ document.addEventListener("visibilitychange", async () => {
         });
       });
   } else {
+    document.body.append("I was hidden!");
     await navigator.serviceWorker.ready;
     navigator.serviceWorker.controller.postMessage({
       type: "focusState",
