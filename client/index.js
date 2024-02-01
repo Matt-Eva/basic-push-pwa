@@ -59,24 +59,6 @@ const clearNotifications = () => {
 
 let count = 0;
 
-navigator.serviceWorker.addEventListener("message", (event) => {
-  if (!document.hidden) {
-    if (event.data && event.data.type === "pushNotification") {
-      count += 1;
-      // Handle the push notification event as needed
-      navigator.serviceWorker.ready.then((reg) => {
-        reg.getNotifications().then((notifications) => {
-          for (let i = 0; i < notifications.length; i += 1) {
-            console.log("iterating notifications");
-            notifications[i].close();
-          }
-        });
-      });
-      // You can trigger any action in response to the push event here
-    }
-  }
-});
-
 document.addEventListener("visibilitychange", async () => {
   console.log("visibility changed");
   console.log(document.hidden);

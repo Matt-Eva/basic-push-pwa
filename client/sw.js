@@ -40,24 +40,30 @@ const openDatabase = () => {
   });
 };
 
-// self.addEventListener("install", (event) => {
-//   event.waitUntil(openDatabase());
-// });
-
-self.addEventListener("push", (e) => {
+self.addEventListener("push", async (e) => {
   const data = e.data.json();
 
-  e.waitUntil(
-    self.registration.showNotification(data.title, {
-      body: data.body,
-    })
-  );
+  if (!db) {
+    await openDatabase();
+  }
 
-  self.clients.matchAll().then((clients) => {
-    clients.forEach((client) => {
-      client.postMessage({ type: "pushNotification" });
-    });
-  });
+  const transaction = db.transaction(["focusState"]);
+  const objectStore = transaction.objectStore("focusState");
+  const request = objectStore.get(1);
+
+  request.onerror = (event) => {
+    console.log(event.target.error);
+  };
+
+  request.onsuccess = (event) => {
+    const result = event.target.result;
+    console.log(result);
+    if (result && !result.isFocused) {
+      self.registration.showNotification(data.title, {
+        body: data.body,
+      });
+    }
+  };
 });
 
 self.addEventListener("message", async (event) => {
