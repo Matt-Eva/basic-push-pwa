@@ -46,10 +46,6 @@ form.addEventListener("submit", async (e) => {
   socket.emit("message", socketArg);
 });
 
-const isPageVisible = () => {
-  return !document.hidden;
-};
-
 const clearNotifications = () => {
   if ("clearNotifications" in window.Notification) {
     console.log("clearing");
@@ -57,18 +53,10 @@ const clearNotifications = () => {
   }
 };
 
-let count = 0;
-
-document.addEventListener("visibilitychange", async () => {
-  console.log("visibility changed");
-  console.log(document.hidden);
+window.addEventListener("blur", async () => {
+  console.log("blurred");
   await navigator.serviceWorker.ready;
-  if (!document.hidden) {
-    navigator.serviceWorker.controller.postMessage({
-      type: "focusState",
-      isFocused: true,
-    });
-  } else {
+  if (document.hidden) {
     navigator.serviceWorker.controller.postMessage({
       type: "focusState",
       isFocused: false,
@@ -76,10 +64,19 @@ document.addEventListener("visibilitychange", async () => {
   }
 });
 
-// window.addEventListener("blur", () => {
-//   console.log("blurred");
-// });
+window.addEventListener("focus", async () => {
+  console.log("focused");
 
-// window.addEventListener("focus", () => {
-//   console.log("focused");
-// });
+  navigator.serviceWorker.ready.then((reg) => {
+    reg.getNotifications().then((notifications) => {
+      for (let i = 0; i < notifications.length; i += 1) {
+        notifications[i].close();
+      }
+    });
+  });
+
+  navigator.serviceWorker.controller.postMessage({
+    type: "focusState",
+    isFocused: true,
+  });
+});

@@ -48,7 +48,12 @@ io.on("connect", (socket) => {
 app.post("/subscribe", (req, res) => {
   const subscription = req.body;
   if (subscription) {
-    subscriptions.push(subscription);
+    const existingSub = subscriptions.find(
+      (sub) => sub.endpoint === subscription.endpoint
+    );
+    if (!existingSub) {
+      subscriptions.push(subscription);
+    }
   }
   res.status(201);
   const payload = JSON.stringify({
