@@ -16,10 +16,10 @@ const registerServiceWorker = async () => {
       applicationServerKey: publicVapidKey,
     });
 
-    // navigator.serviceWorker.controller.postMessage({
-    //   type: "focusState",
-    //   isFocused: true,
-    // });
+    navigator.serviceWorker.controller.postMessage({
+      type: "focusState",
+      isFocused: true,
+    });
 
     if (subscription) {
       const res = await fetch("/subscribe", {
