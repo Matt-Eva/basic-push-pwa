@@ -11,37 +11,32 @@ const registerServiceWorker = async () => {
       scope: "/",
     });
 
-    if (Notification.permission === "granted") {
-      console.log("notifications granted");
-      const subscription = await register.pushManager.subscribe({
-        userVisibleOnly: true,
-        applicationServerKey: publicVapidKey,
-      });
+    const subscription = await register.pushManager.subscribe({
+      userVisibleOnly: true,
+      applicationServerKey: publicVapidKey,
+    });
 
-      navigator.serviceWorker.controller.postMessage({
-        type: "focusState",
-        isFocused: true,
-      });
+    navigator.serviceWorker.controller.postMessage({
+      type: "focusState",
+      isFocused: true,
+    });
 
-      if (subscription) {
-        console.log(subscription);
-        await fetch("http://localhost:4000/subscribe", {
-          method: "POST",
-          body: JSON.stringify(subscription),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        });
-      }
-    } else {
-      console.log("notifications not yet allowed");
+    if (subscription) {
+      const res = await fetch("http://localhost:4000/subscribe", {
+        method: "POST",
+        body: JSON.stringify(subscription),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      console.log(res);
     }
   } catch (error) {
     console.error(error);
   }
 };
 
-if ("serviceWorker" in navigator) {
+if ("serviceWorker" in navigator && Notification.permission === "granted") {
   registerServiceWorker();
 }
 
@@ -51,7 +46,6 @@ const messageContainer = document.getElementById("message-container");
 const activateNotificationButton = document.getElementById(
   "activate-notifications"
 );
-const denyNotificationButton = document.getElementById("deny-notifications");
 
 socket.on("message", (arg) => {
   const p = document.createElement("p");
@@ -100,17 +94,9 @@ form.addEventListener("submit", async (e) => {
 activateNotificationButton.addEventListener("click", async () => {
   const result = await Notification.requestPermission();
   if (result === "granted") {
+    registerServiceWorker();
     alert("notification permission granted");
   }
-});
-
-denyNotificationButton.addEventListener("click", () => {
-  console.log("changing permission");
-  Notification.requestPermission().then((permission) => {
-    if (permission === "denied") {
-      console.log("Notification permission revoked");
-    }
-  });
 });
 
 // navigator.serviceWorker.addEventListener("message", (event) => {

@@ -55,10 +55,10 @@ app.post("/subscribe", (req, res) => {
     if (!existingSub) {
       subscriptions.push(subscription);
     }
-    res.status(201);
+    res.status(201).send({ message: "success" });
   } else {
     console.log("no subscription");
-    res.status(422);
+    res.status(422).send({ message: "failure" });
   }
 });
 
