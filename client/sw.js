@@ -44,6 +44,10 @@ const userFocus = {
   focused: false,
 };
 
+self.addEventListener("activate", () => {
+  userFocus.focused = true;
+});
+
 self.addEventListener("push", async (e) => {
   const data = e.data.json();
 
