@@ -27,10 +27,8 @@ if ("serviceWorker" in navigator) {
 const socket = io();
 const form = document.getElementById("form");
 const messageContainer = document.getElementById("message-container");
-console.log(form);
 
 socket.on("message", (arg) => {
-  console.log(arg);
   const p = document.createElement("p");
   p.textContent = arg;
   messageContainer.append(p);
@@ -59,9 +57,42 @@ const clearNotifications = () => {
   }
 };
 
+let count = 0;
+
+navigator.serviceWorker.addEventListener("message", (event) => {
+  console.log("message event");
+  console.log(document.hidden);
+  if (!document.hidden) {
+    if (event.data && event.data.type === "pushNotification") {
+      console.log(event.data);
+      count += 1;
+      // Handle the push notification event as needed
+      console.log("Received push notification from service worker" + count);
+      navigator.serviceWorker.ready.then((reg) => {
+        reg.getNotifications().then((notifications) => {
+          for (let i = 0; i < notifications.length; i += 1) {
+            console.log("iterating notifications");
+            notifications[i].close();
+          }
+        });
+      });
+      // You can trigger any action in response to the push event here
+    }
+  }
+});
+
 document.addEventListener("visibilitychange", function () {
+  console.log("visibility changed");
   if (isPageVisible()) {
     // Page is now visible, clear notifications
-    clearNotifications();
+    // clearNotifications();
+    console.log("visible page");
+    navigator.serviceWorker.ready.then((reg) => {
+      reg.getNotifications().then((notifications) => {
+        for (let i = 0; i < notifications.length; i += 1) {
+          notifications[i].close();
+        }
+      });
+    });
   }
 });

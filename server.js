@@ -37,9 +37,9 @@ io.on("connect", (socket) => {
       body: message,
     });
     subscriptions.forEach(async (sub) => {
+      await webPush.sendNotification(sub, payload).catch(console.error);
       if (sub.endpoint !== subscription.endpoint) {
         console.log("pushing");
-        await webPush.sendNotification(sub, payload).catch(console.error);
       }
     });
   });
