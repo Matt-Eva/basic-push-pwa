@@ -48,20 +48,22 @@ io.on("connect", (socket) => {
 app.post("/subscribe", (req, res) => {
   const subscription = req.body;
   if (subscription) {
+    console.log(subscription);
     const existingSub = subscriptions.find(
       (sub) => sub.endpoint === subscription.endpoint
     );
     if (!existingSub) {
       subscriptions.push(subscription);
     }
+    res.status(201);
+  } else {
+    console.log("no subscription");
+    res.status(422);
   }
-  res.status(201);
-  const payload = JSON.stringify({
-    title: "Hello world",
-    body: "This is your first push notification",
-  });
+});
 
-  webPush.sendNotification(subscription, payload).catch(console.error);
+app.get("/test", (req, res) => {
+  res.status(200).send({ message: "hello world!" });
 });
 
 server.listen(port, () => {

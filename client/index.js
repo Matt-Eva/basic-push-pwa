@@ -1,28 +1,44 @@
 const publicVapidKey =
   "BHNo9UH99n13_rysw87bs0zMGxQLKAw_OJ-JmlS11Enm2vcon4WYkF3HNeAsfTPbpYtw_PBpNiqiWSqObvlfuJI";
 
+fetch("/test")
+  .then((r) => r.json())
+  .then(console.log);
+
 const registerServiceWorker = async () => {
-  const register = await navigator.serviceWorker.register("./sw.js", {
-    scope: "/",
-  });
+  try {
+    const register = await navigator.serviceWorker.register("./sw.js", {
+      scope: "/",
+    });
 
-  const subscription = await register.pushManager.subscribe({
-    userVisibleOnly: true,
-    applicationServerKey: publicVapidKey,
-  });
+    if (Notification.permission === "granted") {
+      console.log("notifications granted");
+      const subscription = await register.pushManager.subscribe({
+        userVisibleOnly: true,
+        applicationServerKey: publicVapidKey,
+      });
 
-  navigator.serviceWorker.controller.postMessage({
-    type: "focusState",
-    isFocused: true,
-  });
+      navigator.serviceWorker.controller.postMessage({
+        type: "focusState",
+        isFocused: true,
+      });
 
-  await fetch("/subscribe", {
-    method: "POST",
-    body: JSON.stringify(subscription),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
+      if (subscription) {
+        console.log(subscription);
+        await fetch("http://localhost:4000/subscribe", {
+          method: "POST",
+          body: JSON.stringify(subscription),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+      }
+    } else {
+      console.log("notifications not yet allowed");
+    }
+  } catch (error) {
+    console.error(error);
+  }
 };
 
 if ("serviceWorker" in navigator) {
@@ -32,23 +48,15 @@ if ("serviceWorker" in navigator) {
 const socket = io();
 const form = document.getElementById("form");
 const messageContainer = document.getElementById("message-container");
+const activateNotificationButton = document.getElementById(
+  "activate-notifications"
+);
+const denyNotificationButton = document.getElementById("deny-notifications");
 
 socket.on("message", (arg) => {
   const p = document.createElement("p");
   p.textContent = arg;
   messageContainer.append(p);
-});
-
-form.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  const message = e.target.textInput.value;
-  const registration = await navigator.serviceWorker.getRegistration();
-  const subscription = await registration.pushManager.getSubscription();
-  const socketArg = {
-    subscription,
-    message,
-  };
-  socket.emit("message", socketArg);
 });
 
 document.addEventListener("visibilitychange", async () => {
@@ -75,6 +83,34 @@ document.addEventListener("visibilitychange", async () => {
       isFocused: false,
     });
   }
+});
+
+form.addEventListener("submit", async (e) => {
+  e.preventDefault();
+  const message = e.target.textInput.value;
+  const registration = await navigator.serviceWorker.getRegistration();
+  const subscription = await registration.pushManager.getSubscription();
+  const socketArg = {
+    subscription,
+    message,
+  };
+  socket.emit("message", socketArg);
+});
+
+activateNotificationButton.addEventListener("click", async () => {
+  const result = await Notification.requestPermission();
+  if (result === "granted") {
+    alert("notification permission granted");
+  }
+});
+
+denyNotificationButton.addEventListener("click", () => {
+  console.log("changing permission");
+  Notification.requestPermission().then((permission) => {
+    if (permission === "denied") {
+      console.log("Notification permission revoked");
+    }
+  });
 });
 
 // navigator.serviceWorker.addEventListener("message", (event) => {
