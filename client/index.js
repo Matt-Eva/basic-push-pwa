@@ -49,18 +49,20 @@ form.addEventListener("submit", async (e) => {
 document.addEventListener("visibilitychange", async () => {
   console.log("changing visibility");
   if (!document.hidden) {
-    navigator.serviceWorker.ready.then((reg) => {
-      reg.getNotifications().then((notifications) => {
-        for (let i = 0; i < notifications.length; i += 1) {
-          notifications[i].close();
-        }
+    navigator.serviceWorker.ready
+      .then((reg) => {
+        reg.getNotifications().then((notifications) => {
+          for (let i = 0; i < notifications.length; i += 1) {
+            notifications[i].close();
+          }
+        });
+      })
+      .then(() => {
+        navigator.serviceWorker.controller.postMessage({
+          type: "focusState",
+          isFocused: true,
+        });
       });
-    });
-
-    navigator.serviceWorker.controller.postMessage({
-      type: "focusState",
-      isFocused: true,
-    });
   } else {
     await navigator.serviceWorker.ready;
     navigator.serviceWorker.controller.postMessage({
@@ -70,25 +72,25 @@ document.addEventListener("visibilitychange", async () => {
   }
 });
 
-navigator.serviceWorker.addEventListener("message", (event) => {
-  console.log("message event");
-  console.log(document.hidden);
-  if (!document.hidden) {
-    if (event.data && event.data.type === "pushNotification") {
-      console.log(event.data);
-      // Handle the push notification event as needed
-      navigator.serviceWorker.ready.then((reg) => {
-        reg.getNotifications().then((notifications) => {
-          for (let i = 0; i < notifications.length; i += 1) {
-            console.log("iterating notifications");
-            notifications[i].close();
-          }
-        });
-      });
-      // You can trigger any action in response to the push event here
-    }
-  }
-});
+// navigator.serviceWorker.addEventListener("message", (event) => {
+//   console.log("message event");
+//   console.log(document.hidden);
+//   if (!document.hidden) {
+//     if (event.data && event.data.type === "pushNotification") {
+//       console.log(event.data);
+//       // Handle the push notification event as needed
+//       navigator.serviceWorker.ready.then((reg) => {
+//         reg.getNotifications().then((notifications) => {
+//           for (let i = 0; i < notifications.length; i += 1) {
+//             console.log("iterating notifications");
+//             notifications[i].close();
+//           }
+//         });
+//       });
+//       // You can trigger any action in response to the push event here
+//     }
+//   }
+// });
 
 // window.addEventListener("blur", async () => {
 //   console.log("blurred");

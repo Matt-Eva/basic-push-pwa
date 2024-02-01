@@ -40,20 +40,34 @@ const openDatabase = () => {
   });
 };
 
+const userFocus = {
+  focused: false,
+};
+
 self.addEventListener("push", async (e) => {
   const data = e.data.json();
-  e.waitUntil(
+
+  console.log("sw ", userFocus.focused);
+  if (!userFocus.focused) {
     self.registration.showNotification(data.title, {
       body: data.body,
-    })
-  );
-
-  self.clients.matchAll().then((clients) => {
-    clients.forEach((client) => {
-      client.postMessage({ type: "pushNotification" });
     });
-  });
+  }
+
+  // e.waitUntil(
+  //   self.registration.showNotification(data.title, {
+  //     body: data.body,
+  //   })
 });
+
+self.addEventListener("message", (event) => {
+  console.log("message received");
+
+  if (event.data && event.data.type === "focusState") {
+    userFocus.focused = event.data.isFocused;
+  }
+});
+
 // self.addEventListener("push", async (e) => {
 //   const data = e.data.json();
 
