@@ -76,7 +76,6 @@ navigator.serviceWorker.addEventListener("message", (event) => {
   if (!document.hidden) {
     if (event.data && event.data.type === "pushNotification") {
       console.log(event.data);
-      count += 1;
       // Handle the push notification event as needed
       console.log("Received push notification from service worker" + count);
       navigator.serviceWorker.ready.then((reg) => {
