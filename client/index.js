@@ -22,7 +22,7 @@ const registerServiceWorker = async () => {
     });
 
     if (subscription) {
-      const res = await fetch("http://localhost:4000/subscribe", {
+      const res = await fetch("/subscribe", {
         method: "POST",
         body: JSON.stringify(subscription),
         headers: {
