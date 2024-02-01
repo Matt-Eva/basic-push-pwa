@@ -47,7 +47,11 @@ const userFocus = {
 self.addEventListener("push", async (e) => {
   const data = e.data.json();
 
-  console.log("sw ", userFocus.focused);
+  const notifications = await self.registration.getNotifications();
+
+  console.log(notifications);
+  console.log(data);
+
   if (!userFocus.focused) {
     self.registration.showNotification(data.title, {
       body: data.body,
