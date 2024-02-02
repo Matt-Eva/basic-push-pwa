@@ -34,8 +34,10 @@ io.on("connect", (socket) => {
       title: "New Message",
       body: message,
     });
+
     subscriptions.forEach(async (sub) => {
       await webPush.sendNotification(sub, payload).catch(console.error);
+      console.log("pushing");
     });
   });
 });
