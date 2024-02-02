@@ -1,10 +1,6 @@
 const publicVapidKey =
   "BHNo9UH99n13_rysw87bs0zMGxQLKAw_OJ-JmlS11Enm2vcon4WYkF3HNeAsfTPbpYtw_PBpNiqiWSqObvlfuJI";
 
-fetch("/test")
-  .then((r) => r.json())
-  .then(console.log);
-
 const registerServiceWorker = async () => {
   try {
     const register = await navigator.serviceWorker.register("./sw.js", {
@@ -29,8 +25,15 @@ const registerServiceWorker = async () => {
           "Content-Type": "application/json",
         },
       });
-      console.log(res);
     }
+
+    navigator.serviceWorker.addEventListener("message", (event) => {
+      console.log("message received");
+      if (event.data) {
+        console.log(event.data.type);
+        document.body.append(event.data.body);
+      }
+    });
   } catch (error) {
     console.error(error);
   }
@@ -54,7 +57,6 @@ socket.on("message", (arg) => {
 });
 
 document.addEventListener("visibilitychange", async () => {
-  console.log("changing visibility");
   if (!document.hidden) {
     navigator.serviceWorker.ready
       .then((reg) => {

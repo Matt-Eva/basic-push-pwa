@@ -18,8 +18,6 @@ const publicKey = process.env.VAPID_PUBLIC_KEY;
 const privateKey = process.env.VAPID_PRIVATE_KEY;
 const vapidSubject = process.env.VAPID_SUBJECT;
 
-console.log(publicKey);
-
 webPush.setVapidDetails(vapidSubject, publicKey, privateKey);
 
 const subscriptions = [];
@@ -30,7 +28,7 @@ io.on("connect", (socket) => {
     const message = arg.message;
     const subscription = arg.subscription;
 
-    socket.broadcast.emit("message", message);
+    socket.emit("message", message);
 
     const payload = JSON.stringify({
       title: "New Message",
@@ -38,9 +36,6 @@ io.on("connect", (socket) => {
     });
     subscriptions.forEach(async (sub) => {
       await webPush.sendNotification(sub, payload).catch(console.error);
-      if (subscription && sub.endpoint !== subscription.endpoint) {
-        console.log("pushing");
-      }
     });
   });
 });
